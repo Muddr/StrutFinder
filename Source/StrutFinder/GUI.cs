@@ -27,7 +27,7 @@ namespace StrutFinder
 
             if (app.DEBUG) app.Log("GUI.OnGUI()", false);
 
-                app.strutwin = GUILayout.Window(app.GetInstanceID() + 1, app.strutwin, new UnityEngine.GUI.WindowFunction(draw), "Struts & Fuel Ducts", new GUILayoutOption[0]);
+                app.strutwin = KSPUtil.ClampRectToScreen(GUILayout.Window(app.GetInstanceID() + 1, app.strutwin, new UnityEngine.GUI.WindowFunction(draw), "Struts & Fuel Ducts", new GUILayoutOption[0]));
 
         }
         void showGoodStruts()
@@ -104,6 +104,36 @@ namespace StrutFinder
                 case lineType.badStrut:
                     app.HighlightSinglePart(XKCDColors.OffWhite, app.badStrutColor, part);
                     break;
+            }
+
+            if(HighLogic.LoadedSceneIsEditor)
+            {
+                var camera = EditorLogic.fetch.editorCamera;
+                var sphCam = camera.GetComponent<SPHCamera>();
+                var vabCam = camera.GetComponent<VABCamera>();
+
+                // WHY THE EFF DOES IKSPCamera not declare PlaceCamera, SQUAD!?
+                if(sphCam.enabled && sphCam != null)
+                {
+                    sphCam.PlaceCamera(part.transform.position, app.camOffsetDistance);
+                }
+                else if(vabCam.enabled && vabCam != null)
+                {
+                    vabCam.PlaceCamera(part.transform.position, app.camOffsetDistance);
+                }
+                else
+                {
+                    Debug.LogError("StrutFinder: Unable to locate a valid editor camera component.");
+                }
+            }
+            else if(HighLogic.LoadedSceneIsFlight)
+            {
+                if (MapView.MapIsEnabled || (CameraManager.Instance.currentCameraMode == CameraManager.CameraMode.IVA))
+                    return;
+
+                var camera = FlightCamera.fetch;
+                camera.SetTargetPart(part);
+                camera.SetDistance(app.camOffsetDistance);
             }
         }
         void draw(int id)

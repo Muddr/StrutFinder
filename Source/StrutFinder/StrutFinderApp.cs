@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using KSP.UI.Screens;
+using UnityEngine.EventSystems;
 
 namespace StrutFinder
 {
     [KSPAddon(KSPAddon.Startup.FlightAndEditor, false)]
-    public class StrutFinderApp : MonoBehaviour
+    public class StrutFinderApp : BaseRaycaster
     {
         private GUI gui;
 
@@ -36,12 +37,19 @@ namespace StrutFinder
         public Color badStrutColor = XKCDColors.Red;
         public Color badFuelLineColor = XKCDColors.Pink;
 
+        public float camOffsetDistance = 1.0f;
 
+        public override Camera eventCamera => null;
+        public override int sortOrderPriority => MainCanvasUtil.MainCanvas.sortingOrder - 1;
 
-		const float WIDTH = 500.0f;
+        private Mouse _mouseController;
+
+        const float WIDTH = 500.0f;
 		const float HEIGHT = 250.0f;
-		void Start()
+		protected override void Start()
 		{
+            _mouseController = HighLogic.fetch.GetComponent<Mouse>();
+
             strutwin = new Rect ((float)(Screen.width- WIDTH), (float)(Screen.height / 2.0 - HEIGHT), WIDTH, HEIGHT);
 		}
 
@@ -344,7 +352,7 @@ namespace StrutFinder
             }
         }
 
-        void OnDestroy()
+        protected override void OnDestroy()
         {
             if (launcherButton != null)
             {
@@ -353,6 +361,8 @@ namespace StrutFinder
             GameEvents.onGUIApplicationLauncherReady.Remove(OnGUIAppLauncherReady);
             gui = null;
             launcherButtonNeedsInitializing = true;
+
+            if (_mouseController) _mouseController.enabled = true;
         }
 
         void LateUpdate()
@@ -406,6 +416,8 @@ namespace StrutFinder
                         badStrutColor.g = float.Parse(node.GetValue("BadStrutColor_g"));
                         badStrutColor.b = float.Parse(node.GetValue("BadStrutColor_b"));
                         badStrutColor.a = float.Parse(node.GetValue("BadStrutColor_a"));
+
+                        camOffsetDistance = float.Parse(node.GetValue("CamOffsetDistance"));
                     }
                     catch (Exception)
                     {
@@ -455,6 +467,8 @@ namespace StrutFinder
             sN.AddValue("BadStrutColor_b", badStrutColor.b.ToString());
             sN.AddValue("BadStrutColor_a", badStrutColor.a.ToString());
 
+            sN.AddValue("CamOffsetDistance", camOffsetDistance);
+
             settings.AddNode(sN);
 
             settings.Save(KSPUtil.ApplicationRootPath + sSettingURL, "StrutFinder Setting File");
@@ -464,6 +478,35 @@ namespace StrutFinder
         {
                 if (warning) Debug.LogWarning("[StrutFinder] " + message);
                 else Debug.Log("[StrutFinder] " + message);
+        }
+
+        public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
+        {
+            if (!display) return;
+
+            var mousePos = Input.mousePosition;
+            var screenPos = new Vector2(mousePos.x, Screen.height - mousePos.y);
+
+            if(!strutwin.Contains(screenPos))
+            {
+                _mouseController.enabled = true;
+                return;
+            }
+
+            _mouseController.enabled = false;
+            Mouse.Left.ClearMouseState();
+            Mouse.Middle.ClearMouseState();
+            Mouse.Right.ClearMouseState();
+
+            resultAppendList.Add(new RaycastResult
+            {
+                depth = 0,
+                distance = 0f,
+                gameObject = gameObject,
+                module = this,
+                sortingLayer = MainCanvasUtil.MainCanvas.sortingLayerID,
+                screenPosition = screenPos
+            });
         }
     }
 }
