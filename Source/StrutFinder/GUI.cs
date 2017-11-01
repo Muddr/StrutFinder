@@ -27,7 +27,7 @@ namespace StrutFinder
 
             if (app.DEBUG) app.Log("GUI.OnGUI()", false);
 
-                app.strutwin = GUILayout.Window(app.GetInstanceID() + 1, app.strutwin, new UnityEngine.GUI.WindowFunction(draw), "Struts & Fuel Ducts", new GUILayoutOption[0]);
+                app.strutwin = KSPUtil.ClampRectToScreen(GUILayout.Window(app.GetInstanceID() + 1, app.strutwin, new UnityEngine.GUI.WindowFunction(draw), "Struts & Fuel Ducts", new GUILayoutOption[0]));
 
         }
         void showGoodStruts()
