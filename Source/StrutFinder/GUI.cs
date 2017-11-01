@@ -159,6 +159,7 @@ namespace StrutFinder
             if (GUILayout.Button("Hide Window"))
             {
                 app.display = false;
+                app._mouseController.enabled = true;
             }
             if (goodFirst && (app.badFuelLines.Count() + app.badStruts.Count() > 0))
             {
