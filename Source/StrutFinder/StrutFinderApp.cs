@@ -42,7 +42,7 @@ namespace StrutFinder
         public override Camera eventCamera => null;
         public override int sortOrderPriority => MainCanvasUtil.MainCanvas.sortingOrder - 1;
 
-        private Mouse _mouseController;
+        public Mouse _mouseController;
 
         const float WIDTH = 500.0f;
 		const float HEIGHT = 250.0f;
