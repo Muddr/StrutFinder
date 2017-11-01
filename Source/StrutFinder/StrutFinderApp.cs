@@ -482,6 +482,8 @@ namespace StrutFinder
 
         public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
         {
+            if (!display) return;
+
             var mousePos = Input.mousePosition;
             var screenPos = new Vector2(mousePos.x, Screen.height - mousePos.y);
 
