@@ -166,8 +166,9 @@ namespace StrutFinder
                 {
                     Part part;
 
-                    while ((part = app.badFuelLines.FirstOrDefault()) != null)
+                    for (int i = 0; i < app.badFuelLines.Count; i++)
                     {
+						part = app.badFuelLines[i];
                         try
                         {
                             app.Delete(part);
@@ -177,8 +178,9 @@ namespace StrutFinder
                             app.Log("Deletion of part: " + part.ToString() + "  failed: " + ex , true);
                         }
                     }
-                    while ((part = app.badStruts.FirstOrDefault()) != null)
+                    for (int i = 0; i < app.badStruts.Count; i++)
                     {
+						part = app.badStruts[i];
                         try
                         {
                             app.Delete(part);
@@ -186,9 +188,10 @@ namespace StrutFinder
                         catch (Exception ex)
                         {
                             app.Log("Deletion of part: " + part.ToString() + "  failed: " + ex , true);
+                        }
+                    }
 
-                        }
-                    }
+
 
                     // Repopulate incase a strut with symmetry was deleted
                     app.PopulatePartLists();

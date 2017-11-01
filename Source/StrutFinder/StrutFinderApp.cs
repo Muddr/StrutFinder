@@ -6,7 +6,7 @@ using KSP.UI.Screens;
 
 namespace StrutFinder
 {
-    [KSPAddon(KSPAddon.Startup.EveryScene, false)]
+    [KSPAddon(KSPAddon.Startup.FlightAndEditor, false)]
     public class StrutFinderApp : MonoBehaviour
     {
         private GUI gui;
@@ -80,7 +80,7 @@ namespace StrutFinder
                 EditorLogic.DeletePart(part);
 
                 // Finally, poke the staging logic to sort out any changes due to deleting this part.
-                Staging.SortIcons();
+                StageManager.Instance.SortIcons(true);
             }
 
             if (HighLogic.LoadedSceneIsFlight)
@@ -107,18 +107,17 @@ namespace StrutFinder
 		
         void OnGUIAppLauncherReady()
         {
-            if (ApplicationLauncher.Ready)
-            {
-                launcherButton = ApplicationLauncher.Instance.AddModApplication(
-                    TurnHighlightOn,
-                    TurnHighlightOff,
-                    null,
-                    null,
-                    null,
-                    null,
-                    ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH | ApplicationLauncher.AppScenes.FLIGHT,
-                    (Texture)GameDatabase.Instance.GetTexture(HighlightIconOff, false));
-            }
+            if (launcherButton != null) return;
+
+            launcherButton = ApplicationLauncher.Instance.AddModApplication(
+                TurnHighlightOn,
+                TurnHighlightOff,
+                null,
+                null,
+                null,
+                null,
+                ApplicationLauncher.AppScenes.VAB | ApplicationLauncher.AppScenes.SPH | ApplicationLauncher.AppScenes.FLIGHT,
+                (Texture)GameDatabase.Instance.GetTexture(HighlightIconOff, false));
         }
 
         void TurnHighlightOn()
@@ -155,16 +154,17 @@ namespace StrutFinder
             {
                 case true:
                     if (DEBUG) Log("Turn On Highlights", false);
+                    ToggleGlobalHighlight(true);
                     PopulatePartLists();
 
                     launcherButton.SetTexture((Texture)GameDatabase.Instance.GetTexture(HighlightIconOn, false));
 
                     GameEvents.onEditorPartEvent.Add(EditorPartChange);
-
                     break;
 
                 case false:
                     if (DEBUG) Log("Turn Off Highlights", false);
+                    ToggleGlobalHighlight(false);
                     UnHighlightParts(goodFuelLines);
                     UnHighlightParts(goodStruts);
                     UnHighlightParts( badFuelLines);
@@ -179,6 +179,30 @@ namespace StrutFinder
                 default:
                     if (DEBUG) Log("Error ToggleHighlight()", true);
                     break;
+            }
+        }
+
+		void ToggleGlobalHighlight (bool state)
+        {
+            List<Part> parts = new List<Part>();
+
+            if (HighLogic.LoadedSceneIsEditor)
+                parts = EditorLogic.SortedShipList;
+            else if (HighLogic.LoadedSceneIsFlight)
+                parts = FlightGlobals.ActiveVessel.parts;
+
+            var count = parts.Count;
+            for (var i=0; i < count; i++)
+            {
+                switch (state)
+                {
+                    case true:
+                        parts[i].SetHighlightType(Part.HighlightType.Disabled);
+                        break;
+                    case false:
+                        parts[i].SetHighlightDefault();
+                        break;
+                }
             }
         }
 
