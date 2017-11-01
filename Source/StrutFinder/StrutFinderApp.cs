@@ -36,6 +36,7 @@ namespace StrutFinder
         public Color badStrutColor = XKCDColors.Red;
         public Color badFuelLineColor = XKCDColors.Pink;
 
+        public float camOffsetDistance = 1.0f;
 
 
 		const float WIDTH = 500.0f;
@@ -406,6 +407,8 @@ namespace StrutFinder
                         badStrutColor.g = float.Parse(node.GetValue("BadStrutColor_g"));
                         badStrutColor.b = float.Parse(node.GetValue("BadStrutColor_b"));
                         badStrutColor.a = float.Parse(node.GetValue("BadStrutColor_a"));
+
+                        camOffsetDistance = float.Parse(node.GetValue("CamOffsetDistance"));
                     }
                     catch (Exception)
                     {
@@ -454,6 +457,8 @@ namespace StrutFinder
             sN.AddValue("BadStrutColor_g", badStrutColor.g.ToString());
             sN.AddValue("BadStrutColor_b", badStrutColor.b.ToString());
             sN.AddValue("BadStrutColor_a", badStrutColor.a.ToString());
+
+            sN.AddValue("CamOffsetDistance", camOffsetDistance);
 
             settings.AddNode(sN);
 
