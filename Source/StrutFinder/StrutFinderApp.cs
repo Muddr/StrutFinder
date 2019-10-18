@@ -37,6 +37,7 @@ namespace StrutFinder
         public Color badStrutColor = XKCDColors.Red;
         public Color badFuelLineColor = XKCDColors.Pink;
 
+		public float existingHighlightFactor = 0.5f;
         public float camOffsetDistance = 1.0f;
 
         public override Camera eventCamera => null;
@@ -50,6 +51,7 @@ namespace StrutFinder
 		{
             _mouseController = HighLogic.fetch.GetComponent<Mouse>();
 
+			existingHighlightFactor = Highlighting.Highlighter.HighlighterLimit;
             strutwin = new Rect ((float)(Screen.width- WIDTH), (float)(Screen.height / 2.0 - HEIGHT), WIDTH, HEIGHT);
 		}
 
@@ -112,7 +114,7 @@ namespace StrutFinder
                 }
             }
 		}
-		
+
         void OnGUIAppLauncherReady()
         {
             if (launcherButton != null) return;
@@ -130,11 +132,13 @@ namespace StrutFinder
 
         void TurnHighlightOn()
         {
+			Highlighting.Highlighter.HighlighterLimit = 1f;
             ToggleHighlight(true);
         }
 
         void TurnHighlightOff()
         {
+			Highlighting.Highlighter.HighlighterLimit = existingHighlightFactor;
             ToggleHighlight(false);
         }
 
@@ -270,11 +274,8 @@ namespace StrutFinder
                 return;
             }
 
-      
-
             foreach (CompoundPart p in vesselP.OfType<CompoundPart>())
             {
-				
                 switch (p.name)
                 {
                     case "fuelLine":
@@ -334,12 +335,6 @@ namespace StrutFinder
                 foreach (Part p in partList)
                 {
                 HighlightSinglePart(highlightC, edgeHighlightColor, p);
-                p.SetHighlightDefault();
-                p.SetHighlightType(Part.HighlightType.AlwaysOn);
-                p.SetHighlight(true, false);
-                p.SetHighlightColor(highlightC);
-                p.highlighter.ConstantOn(edgeHighlightColor);
-                p.highlighter.SeeThroughOn();
             }
         }
 
@@ -377,7 +372,6 @@ namespace StrutFinder
             }
         }
 
-        
         void LoadSettings(string sSettingURL)
         {
             try
