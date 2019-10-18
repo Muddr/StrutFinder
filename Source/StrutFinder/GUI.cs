@@ -156,11 +156,6 @@ namespace StrutFinder
 
             GUILayout.EndScrollView();
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Hide Window"))
-            {
-                app.display = false;
-                app._mouseController.enabled = true;
-            }
             if (goodFirst && (app.badFuelLines.Count() + app.badStruts.Count() > 0))
             {
                 if (GUILayout.Button("Show bad struts first"))
